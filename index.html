@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Daily Entry Form</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root {
+      --dark: #23262b;
+      --orange: #f2830f;
+      --orange-dark: #d96c00;
+      --green: #1e8e3e;
+      --red: #d93025;
+      --ink: #1b1e2e;
+      --muted: #6b7280;
+      --border: #e3e5ea;
+      --bg: #f4f5f8;
+      --card: #ffffff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+    }
+    header {
+      background: var(--dark);
+      border-bottom: 3px solid var(--orange);
+      padding: 16px 20px;
+    }
+    header h1 { font-size: 17px; margin: 0; color: #fff; }
+    header .sub { font-size: 12px; color: #aeb2c9; margin-top: 2px; }
+
+    main { max-width: 560px; margin: 0 auto; padding: 16px; }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .section-title { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin: 0 0 12px; }
+
+    .field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 14px; }
+    .field label { font-size: 13px; font-weight: 500; }
+    .field label .req { color: var(--red); }
+    .field input, .field select, .field textarea {
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 14px;
+      width: 100%;
+      font-family: inherit;
+    }
+    .field textarea { resize: vertical; min-height: 56px; }
+    .field .hint { font-size: 11px; color: var(--muted); }
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .lookup-row { display: flex; gap: 8px; }
+    .lookup-row input { flex: 1; }
+    button.mini {
+      border: 1px solid var(--border);
+      background: var(--card);
+      border-radius: 6px;
+      padding: 0 14px;
+      font-size: 13px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .lookup-status { font-size: 12px; margin-top: 4px; min-height: 14px; }
+    .lookup-status.found { color: var(--green); }
+    .lookup-status.notfound { color: var(--muted); }
+
+    button.submit {
+      width: 100%;
+      background: var(--orange);
+      color: #fff;
+      border: none;
+      padding: 14px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button.submit:hover { background: var(--orange-dark); }
+    button.submit:disabled { background: #f7c894; cursor: default; }
+
+    .status-banner {
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 14px;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .status-banner.success { display: block; background: #e6f4ea; color: var(--green); }
+    .status-banner.error { display: block; background: #fce8e6; color: var(--red); }
+
+    @media (max-width: 480px) {
+      .row-2 { grid-template-columns: 1fr; }
+      main { padding: 12px; }
+      .card { padding: 14px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Daily Entry Form</h1>
+    <div class="sub">Submits directly into Supabase</div>
+  </header>
+
+  <main>
+    <div class="status-banner" id="status-banner"></div>
+
+    <form id="entry-form">
+      <div class="card">
+        <div class="section-title">Employee</div>
+
+        <div class="field">
+          <label for="f-employeeCode">Employee Code <span class="req">*</span></label>
+          <div class="lookup-row">
+            <input type="text" id="f-employeeCode" required placeholder="e.g. E1023">
+            <button type="button" class="mini" id="lookup-btn">Look up</button>
+          </div>
+          <div class="lookup-status" id="lookup-status"></div>
+        </div>
+
+        <div class="field">
+          <label for="f-name">Name <span class="req">*</span></label>
+          <input type="text" id="f-name" required>
+        </div>
+
+        <div class="row-2">
+          <div class="field">
+            <label for="f-designation">Designation</label>
+            <input type="text" id="f-designation">
+          </div>
+          <div class="field">
+            <label for="f-homeLocation">Home Location</label>
+            <input type="text" id="f-homeLocation">
+          </div>
+        </div>
+
+        <div class="row-2">
+          <div class="field">
+            <label for="f-mobile">Mobile Number</label>
+            <input type="tel" id="f-mobile">
+          </div>
+          <div class="field">
+            <label for="f-email">Email Address</label>
+            <input type="email" id="f-email">
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">Section &amp; Date</div>
+
+        <div class="field">
+          <label for="f-date">Date <span class="req">*</span></label>
+          <input type="date" id="f-date" required>
+        </div>
+
+        <div class="field">
+          <label for="f-sectionName">Section Name</label>
+          <input type="text" id="f-sectionName">
+        </div>
+
+        <div class="field">
+          <label for="f-currentWorkingSection">Current Working Section <span class="req">*</span></label>
+          <select id="f-currentWorkingSection" required><option value="">Select…</option></select>
+          <div class="hint">Must be a registered zone (managed from the Zones tab of the dashboard).</div>
+        </div>
+
+        <div class="field">
+          <label for="f-teamLeader">Team Leader / Section In-Charge</label>
+          <select id="f-teamLeader"><option value="">Select a Current Working Section first…</option></select>
+          <input type="text" id="f-teamLeaderManual" placeholder="Enter team leader manually" style="display:none; margin-top:6px;">
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">Leave</div>
+        <div class="row-2">
+          <div class="field">
+            <label for="f-leaveFrom">Leave From</label>
+            <input type="date" id="f-leaveFrom">
+          </div>
+          <div class="field">
+            <label for="f-leaveTo">Leave To</label>
+            <input type="date" id="f-leaveTo">
+          </div>
+        </div>
+        <div class="hint">Leave both blank if not on leave. Fill only "From" for a single day.</div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">Mobile App</div>
+        <div class="row-2">
+          <div class="field">
+            <label for="f-checkIn">Check-In Time <span class="req">*</span></label>
+            <input type="time" id="f-checkIn" required>
+          </div>
+          <div class="field">
+            <label for="f-checkOut">Check-Out Time <span class="req">*</span></label>
+            <input type="time" id="f-checkOut" required>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">Work Details</div>
+
+        <div class="field">
+          <label for="f-worksAssignedStation">Works Assigned Station <span class="req">*</span></label>
+          <input type="text" id="f-worksAssignedStation" required>
+        </div>
+
+        <div class="field">
+          <label for="f-worksAssigned">Works Assigned <span class="req">*</span></label>
+          <textarea id="f-worksAssigned" required></textarea>
+        </div>
+
+        <div class="field">
+          <label for="f-assignedWorksStatus">Assigned Works Status <span class="req">*</span></label>
+          <select id="f-assignedWorksStatus" required>
+            <option value="Done">Done</option>
+            <option value="Work in Progress">Work in Progress</option>
+            <option value="__manual__">Other (enter manually)</option>
+          </select>
+          <input type="text" id="f-assignedWorksStatusManual" placeholder="Enter status" style="display:none; margin-top:6px;">
+        </div>
+
+        <div class="field">
+          <label for="f-remarks">Remarks</label>
+          <textarea id="f-remarks"></textarea>
+        </div>
+      </div>
+
+      <button type="submit" class="submit" id="submit-btn">Submit Entry</button>
+    </form>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="supabase-client.js"></script>
+  <script>
+    function todayIso() {
+      var d = new Date();
+      var mm = ('0' + (d.getMonth() + 1)).slice(-2);
+      var dd = ('0' + d.getDate()).slice(-2);
+      return d.getFullYear() + '-' + mm + '-' + dd;
+    }
+    document.getElementById('f-date').value = todayIso();
+
+    function showBanner(text, kind) {
+      var el = document.getElementById('status-banner');
+      el.textContent = text;
+      el.className = 'status-banner ' + kind;
+    }
+    function clearBanner() {
+      var el = document.getElementById('status-banner');
+      el.className = 'status-banner';
+      el.textContent = '';
+    }
+
+    /* ---------- populate section dropdowns ---------- */
+    async function loadSections() {
+      var { data, error } = await window.supabaseClient
+        .from('zones')
+        .select('name')
+        .order('name');
+
+      if (error) {
+        showBanner('Could not load section list: ' + error.message, 'error');
+        return;
+      }
+
+      var select = document.getElementById('f-currentWorkingSection');
+      data.forEach(function (row) {
+        var opt = document.createElement('option');
+        opt.value = row.name;
+        opt.textContent = row.name;
+        select.appendChild(opt);
+      });
+    }
+    loadSections();
+
+    /* ---------- team leader dropdown, driven by Current Working Section ---------- */
+    // Guards against overlapping calls (e.g. blur + click both firing a lookup at
+    // once) racing to populate the same <select> — only the most recent call's
+    // result is ever applied.
+    var teamLeaderLoadToken = 0;
+    async function loadTeamLeadersForZone(zone) {
+      var myToken = ++teamLeaderLoadToken;
+      var select = document.getElementById('f-teamLeader');
+
+      if (!zone) {
+        select.innerHTML = '<option value="">Select a Current Working Section first…</option>';
+        return;
+      }
+
+      var { data, error } = await window.supabaseClient
+        .from('employees')
+        .select('team_leader')
+        .eq('zone', zone);
+
+      if (myToken !== teamLeaderLoadToken) return;
+
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      var names = Array.from(new Set(
+        (data || [])
+          .map(function (r) { return (r.team_leader || '').trim(); })
+          .filter(function (v) { return v; })
+      )).sort();
+
+      select.innerHTML = '<option value="">Select…</option>';
+      names.forEach(function (name) {
+        var opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = name;
+        select.appendChild(opt);
+      });
+
+      var manualOpt = document.createElement('option');
+      manualOpt.value = '__manual__';
+      manualOpt.textContent = 'Other (enter manually)';
+      select.appendChild(manualOpt);
+    }
+
+    document.getElementById('f-currentWorkingSection').addEventListener('change', function () {
+      loadTeamLeadersForZone(this.value);
+      document.getElementById('f-teamLeaderManual').style.display = 'none';
+      document.getElementById('f-teamLeaderManual').value = '';
+    });
+
+    document.getElementById('f-teamLeader').addEventListener('change', function () {
+      var manualInput = document.getElementById('f-teamLeaderManual');
+      manualInput.style.display = this.value === '__manual__' ? '' : 'none';
+      if (this.value !== '__manual__') manualInput.value = '';
+    });
+
+    function setTeamLeaderValue(teamLeader) {
+      if (!teamLeader) return;
+      var select = document.getElementById('f-teamLeader');
+      var manualInput = document.getElementById('f-teamLeaderManual');
+      var trimmed = teamLeader.trim();
+      var matched = Array.prototype.some.call(select.options, function (o) { return o.value === trimmed; });
+      if (matched) {
+        select.value = trimmed;
+        manualInput.style.display = 'none';
+        manualInput.value = '';
+      } else {
+        select.value = '__manual__';
+        manualInput.style.display = '';
+        manualInput.value = trimmed;
+      }
+    }
+
+    /* ---------- employee lookup / auto-fill ---------- */
+    async function runLookup() {
+      var code = document.getElementById('f-employeeCode').value.trim();
+      if (!code) return;
+      var statusEl = document.getElementById('lookup-status');
+      statusEl.textContent = 'Looking up…';
+      statusEl.className = 'lookup-status';
+
+      var { data, error } = await window.supabaseClient
+        .from('employees')
+        .select('name, designation, home_location, mobile, email, team_leader, section_name, zone')
+        .ilike('employee_code', code)
+        .maybeSingle();
+
+      if (error) {
+        statusEl.textContent = 'Lookup error: ' + error.message;
+        statusEl.className = 'lookup-status notfound';
+        return;
+      }
+
+      if (data) {
+        statusEl.textContent = 'Found — fields auto-filled.';
+        statusEl.className = 'lookup-status found';
+        if (data.name) document.getElementById('f-name').value = data.name;
+        if (data.designation) document.getElementById('f-designation').value = data.designation;
+        if (data.home_location) document.getElementById('f-homeLocation').value = data.home_location;
+        if (data.mobile) document.getElementById('f-mobile').value = data.mobile;
+        if (data.email) document.getElementById('f-email').value = data.email;
+        if (data.section_name && !document.getElementById('f-sectionName').value) {
+          document.getElementById('f-sectionName').value = data.section_name;
+        }
+
+        var zoneSelect = document.getElementById('f-currentWorkingSection');
+        if (data.zone && !zoneSelect.value && Array.prototype.some.call(zoneSelect.options, function (o) { return o.value === data.zone; })) {
+          zoneSelect.value = data.zone;
+        }
+        if (zoneSelect.value) {
+          await loadTeamLeadersForZone(zoneSelect.value);
+        }
+        setTeamLeaderValue(data.team_leader);
+      } else {
+        statusEl.textContent = 'Not found in employees — fill details manually.';
+        statusEl.className = 'lookup-status notfound';
+      }
+    }
+    document.getElementById('lookup-btn').addEventListener('click', runLookup);
+    document.getElementById('f-employeeCode').addEventListener('blur', runLookup);
+
+    /* ---------- assigned works status: manual override ---------- */
+    document.getElementById('f-assignedWorksStatus').addEventListener('change', function () {
+      var manualInput = document.getElementById('f-assignedWorksStatusManual');
+      manualInput.style.display = this.value === '__manual__' ? '' : 'none';
+      if (this.value !== '__manual__') manualInput.value = '';
+    });
+
+    /* ---------- submit ---------- */
+    document.getElementById('entry-form').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      clearBanner();
+
+      var currentWorkingSection = document.getElementById('f-currentWorkingSection').value;
+      if (!currentWorkingSection) {
+        showBanner('Please select a Current Working Section.', 'error');
+        return;
+      }
+
+      if (document.getElementById('f-assignedWorksStatus').value === '__manual__'
+          && !document.getElementById('f-assignedWorksStatusManual').value.trim()) {
+        showBanner('Please enter the Assigned Works Status.', 'error');
+        return;
+      }
+
+      var leaveFrom = document.getElementById('f-leaveFrom').value || null;
+      var leaveTo = document.getElementById('f-leaveTo').value || null;
+
+      var entry = {
+        entry_date: document.getElementById('f-date').value,
+        section_name: document.getElementById('f-sectionName').value || null,
+        team_leader: (function () {
+          var selected = document.getElementById('f-teamLeader').value;
+          return selected === '__manual__'
+            ? (document.getElementById('f-teamLeaderManual').value || null)
+            : (selected || null);
+        })(),
+        employee_code: document.getElementById('f-employeeCode').value.trim(),
+        employee_name: document.getElementById('f-name').value.trim(),
+        designation: document.getElementById('f-designation').value || null,
+        home_location: document.getElementById('f-homeLocation').value || null,
+        mobile: document.getElementById('f-mobile').value || null,
+        current_working_section: currentWorkingSection,
+        leave_from: leaveFrom,
+        leave_to: leaveTo,
+        check_in_time: document.getElementById('f-checkIn').value || null,
+        check_out_time: document.getElementById('f-checkOut').value || null,
+        works_assigned_station: document.getElementById('f-worksAssignedStation').value || null,
+        works_assigned: document.getElementById('f-worksAssigned').value || null,
+        assigned_works_status: (function () {
+          var selected = document.getElementById('f-assignedWorksStatus').value;
+          return selected === '__manual__'
+            ? (document.getElementById('f-assignedWorksStatusManual').value || null)
+            : selected;
+        })(),
+        remarks: document.getElementById('f-remarks').value || null,
+        email: document.getElementById('f-email').value || null
+      };
+
+      var btn = document.getElementById('submit-btn');
+      btn.disabled = true;
+      btn.textContent = 'Submitting…';
+
+      var { error } = await window.supabaseClient.from('entries').insert(entry);
+
+      btn.disabled = false;
+      btn.textContent = 'Submit Entry';
+
+      if (error) {
+        showBanner('Error: ' + error.message, 'error');
+        return;
+      }
+
+      showBanner('Entry saved for "' + currentWorkingSection + '".', 'success');
+      document.getElementById('entry-form').reset();
+      document.getElementById('f-date').value = todayIso();
+      document.getElementById('lookup-status').textContent = '';
+      document.getElementById('f-assignedWorksStatusManual').style.display = 'none';
+      document.getElementById('f-teamLeaderManual').style.display = 'none';
+      loadTeamLeadersForZone('');
+    });
+  </script>
+
+</body>
+</html>
