@@ -254,6 +254,7 @@
       return d.getFullYear() + '-' + mm + '-' + dd;
     }
     document.getElementById('f-date').value = todayIso();
+    document.getElementById('f-date').max = todayIso();
 
     function showBanner(text, kind) {
       var el = document.getElementById('status-banner');
@@ -423,6 +424,11 @@
       e.preventDefault();
       clearBanner();
 
+      if (document.getElementById('f-date').value > todayIso()) {
+        showBanner('Date cannot be in the future — only today or earlier is allowed.', 'error');
+        return;
+      }
+
       var currentWorkingSection = document.getElementById('f-currentWorkingSection').value;
       if (!currentWorkingSection) {
         showBanner('Please select a Current Working Section.', 'error');
@@ -486,6 +492,7 @@
       showBanner('Entry saved for "' + currentWorkingSection + '".', 'success');
       document.getElementById('entry-form').reset();
       document.getElementById('f-date').value = todayIso();
+      document.getElementById('f-date').max = todayIso();
       document.getElementById('lookup-status').textContent = '';
       document.getElementById('f-assignedWorksStatusManual').style.display = 'none';
       document.getElementById('f-teamLeaderManual').style.display = 'none';
