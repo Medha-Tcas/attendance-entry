@@ -108,7 +108,7 @@
 
   <header>
     <h1>Daily Entry Form</h1>
-    <div class="sub">Submits directly into Supabase</div>
+    <div class="sub">Writes straight into the Google Sheet</div>
   </header>
 
   <main>
@@ -243,9 +243,8 @@
     </form>
   </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
-  <script src="supabase-client.js"></script>
+  <script src="sheets-api.js"></script>
   <script>
     function todayIso() {
       var d = new Date();
@@ -269,21 +268,19 @@
 
     /* ---------- populate section dropdowns ---------- */
     async function loadSections() {
-      var { data, error } = await window.supabaseClient
-        .from('zones')
-        .select('name')
-        .order('name');
-
-      if (error) {
-        showBanner('Could not load section list: ' + error.message, 'error');
+      var zones;
+      try {
+        zones = await api('getZones');
+      } catch (err) {
+        showBanner('Could not load section list: ' + err.message, 'error');
         return;
       }
 
       var select = document.getElementById('f-currentWorkingSection');
-      data.forEach(function (row) {
+      zones.forEach(function (name) {
         var opt = document.createElement('option');
-        opt.value = row.name;
-        opt.textContent = row.name;
+        opt.value = name;
+        opt.textContent = name;
         select.appendChild(opt);
       });
     }
@@ -303,23 +300,15 @@
         return;
       }
 
-      var { data, error } = await window.supabaseClient
-        .from('employees')
-        .select('team_leader')
-        .eq('zone', zone);
-
-      if (myToken !== teamLeaderLoadToken) return;
-
-      if (error) {
-        console.error(error);
+      var names;
+      try {
+        names = await api('getTeamLeaders', { zone: zone });
+      } catch (err) {
+        console.error(err);
         return;
       }
 
-      var names = Array.from(new Set(
-        (data || [])
-          .map(function (r) { return (r.team_leader || '').trim(); })
-          .filter(function (v) { return v; })
-      )).sort();
+      if (myToken !== teamLeaderLoadToken) return;
 
       select.innerHTML = '<option value="">Select…</option>';
       names.forEach(function (name) {
@@ -372,19 +361,16 @@
       statusEl.textContent = 'Looking up…';
       statusEl.className = 'lookup-status';
 
-      var { data, error } = await window.supabaseClient
-        .from('employees')
-        .select('name, designation, home_location, mobile, email, team_leader, section_name, zone')
-        .ilike('employee_code', code)
-        .maybeSingle();
-
-      if (error) {
-        statusEl.textContent = 'Lookup error: ' + error.message;
+      var data;
+      try {
+        data = await api('lookupEmployee', { employee_code: code });
+      } catch (err) {
+        statusEl.textContent = 'Lookup error: ' + err.message;
         statusEl.className = 'lookup-status notfound';
         return;
       }
 
-      if (data) {
+      if (data && data.found) {
         statusEl.textContent = 'Found — fields auto-filled.';
         statusEl.className = 'lookup-status found';
         if (data.name) document.getElementById('f-name').value = data.name;
@@ -405,7 +391,7 @@
         }
         setTeamLeaderValue(data.team_leader);
       } else {
-        statusEl.textContent = 'Not found in employees — fill details manually.';
+        statusEl.textContent = 'Not found in EMP_List — fill details manually.';
         statusEl.className = 'lookup-status notfound';
       }
     }
@@ -479,17 +465,20 @@
       btn.disabled = true;
       btn.textContent = 'Submitting…';
 
-      var { error } = await window.supabaseClient.from('entries').insert(entry);
+      var result;
+      try {
+        result = await api('submitEntry', { entry: entry });
+      } catch (err) {
+        btn.disabled = false;
+        btn.textContent = 'Submit Entry';
+        showBanner('Error: ' + err.message, 'error');
+        return;
+      }
 
       btn.disabled = false;
       btn.textContent = 'Submit Entry';
 
-      if (error) {
-        showBanner('Error: ' + error.message, 'error');
-        return;
-      }
-
-      showBanner('Entry saved for "' + currentWorkingSection + '".', 'success');
+      showBanner('Entry saved to the "' + result.sheet + '" sheet (row ' + result.row + ').', 'success');
       document.getElementById('entry-form').reset();
       document.getElementById('f-date').value = todayIso();
       document.getElementById('f-date').max = todayIso();
