@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <title>Daily Entry Form</title>
@@ -9,98 +9,178 @@
       --dark: #23262b;
       --orange: #f2830f;
       --orange-dark: #d96c00;
-      --green: #1e8e3e;
-      --red: #d93025;
+      --orange-soft: #fff4e8;
+      --green: #1e7f38;
+      --green-soft: #e8f5ec;
+      --red: #c5321f;
+      --red-soft: #fdecea;
       --ink: #1b1e2e;
       --muted: #6b7280;
-      --border: #e3e5ea;
-      --bg: #f4f5f8;
+      --line: #e3e5ea;
+      --bg: #f5f6f9;
       --card: #ffffff;
+      --radius: 12px;
     }
     * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
     body {
       margin: 0;
-      font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
       background: var(--bg);
       color: var(--ink);
+      font-size: 15px;
+      line-height: 1.45;
     }
+
     header {
       background: var(--dark);
-      border-bottom: 3px solid var(--orange);
-      padding: 16px 20px;
+      padding: 14px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 20;
     }
-    header h1 { font-size: 17px; margin: 0; color: #fff; }
-    header .sub { font-size: 12px; color: #aeb2c9; margin-top: 2px; }
+    header h1 { font-size: 16px; margin: 0; color: #fff; font-weight: 600; }
+    header .sub { font-size: 12px; color: #9aa0b5; margin-top: 1px; }
 
-    main { max-width: 560px; margin: 0 auto; padding: 16px; }
+    main { max-width: 620px; margin: 0 auto; padding: 16px 16px 96px; }
 
     .card {
       background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 16px;
-      margin-bottom: 16px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 18px;
+      margin-bottom: 14px;
     }
-    .section-title { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin: 0 0 12px; }
+    .card.muted { background: #fafbfc; }
 
-    .field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 14px; }
-    .field label { font-size: 13px; font-weight: 500; }
-    .field label .req { color: var(--red); }
-    .field input, .field select, .field textarea {
-      padding: 10px 12px;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      font-size: 14px;
-      width: 100%;
-      font-family: inherit;
+    .card-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 14px;
     }
-    .field textarea { resize: vertical; min-height: 56px; }
+    .card-head h2 {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin: 0;
+    }
+    .card-head .note { font-size: 11px; color: var(--muted); }
+    .card-head .note.on { color: var(--orange-dark); font-weight: 600; }
+
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .grid .full { grid-column: 1 / -1; }
+
+    .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+    .grid .field { margin-bottom: 0; }
+    .field label { font-size: 13px; font-weight: 500; color: #3a3f52; }
+    .field label .req { color: var(--red); margin-left: 1px; }
     .field .hint { font-size: 11px; color: var(--muted); }
-    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
-    .lookup-row { display: flex; gap: 8px; }
-    .lookup-row input { flex: 1; }
-    button.mini {
-      border: 1px solid var(--border);
-      background: var(--card);
-      border-radius: 6px;
-      padding: 0 14px;
-      font-size: 13px;
-      cursor: pointer;
-      white-space: nowrap;
+    input, select, textarea {
+      font-family: inherit;
+      font-size: 15px;
+      color: var(--ink);
+      background: #fff;
+      padding: 11px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      width: 100%;
+      min-height: 44px;
     }
-    .lookup-status { font-size: 12px; margin-top: 4px; min-height: 14px; }
-    .lookup-status.found { color: var(--green); }
-    .lookup-status.notfound { color: var(--muted); }
+    textarea { resize: vertical; min-height: 76px; line-height: 1.4; }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--orange);
+      box-shadow: 0 0 0 3px rgba(242, 131, 15, .16);
+    }
+    input:disabled, select:disabled, textarea:disabled {
+      background: #f2f3f6;
+      color: #9aa0ad;
+      cursor: not-allowed;
+    }
+    input.invalid, select.invalid, textarea.invalid {
+      border-color: var(--red);
+      background: var(--red-soft);
+    }
 
+    .lookup { display: flex; gap: 8px; }
+    .lookup input { flex: 1; }
+    button {
+      font-family: inherit;
+      cursor: pointer;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    button.ghost {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      padding: 0 16px;
+      min-height: 44px;
+      white-space: nowrap;
+      font-weight: 500;
+    }
+    button.ghost:hover { background: #f5f6f9; }
+
+    .lookup-status { font-size: 12px; min-height: 16px; }
+    .lookup-status.found { color: var(--green); }
+    .lookup-status.miss { color: var(--muted); }
+    .lookup-status.busy { color: var(--muted); }
+
+    .submit-bar {
+      position: fixed;
+      left: 0; right: 0; bottom: 0;
+      background: rgba(255,255,255,.96);
+      border-top: 1px solid var(--line);
+      padding: 12px 16px;
+      z-index: 20;
+    }
+    .submit-bar .inner { max-width: 620px; margin: 0 auto; }
     button.submit {
       width: 100%;
       background: var(--orange);
       color: #fff;
       border: none;
       padding: 14px;
-      border-radius: 8px;
-      font-size: 15px;
+      font-size: 16px;
       font-weight: 600;
-      cursor: pointer;
+      min-height: 50px;
     }
     button.submit:hover { background: var(--orange-dark); }
-    button.submit:disabled { background: #f7c894; cursor: default; }
+    button.submit:disabled { background: #f5cfa6; cursor: default; }
 
-    .status-banner {
-      border-radius: 8px;
-      padding: 12px 14px;
+    .banner {
+      border-radius: var(--radius);
+      padding: 13px 15px;
       font-size: 14px;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
       display: none;
+      border: 1px solid transparent;
     }
-    .status-banner.success { display: block; background: #e6f4ea; color: var(--green); }
-    .status-banner.error { display: block; background: #fce8e6; color: var(--red); }
+    .banner.success { display: block; background: var(--green-soft); color: var(--green); border-color: #bfe0c8; }
+    .banner.error { display: block; background: var(--red-soft); color: var(--red); border-color: #f2c4bd; }
 
-    @media (max-width: 480px) {
-      .row-2 { grid-template-columns: 1fr; }
-      main { padding: 12px; }
-      .card { padding: 14px; }
+    .leave-flag {
+      display: none;
+      background: var(--orange-soft);
+      border: 1px solid #f6d3ac;
+      color: var(--orange-dark);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 13px;
+      margin-bottom: 12px;
+    }
+    .leave-flag.on { display: block; }
+
+    @media (max-width: 560px) {
+      main { padding: 12px 12px 92px; }
+      .card { padding: 15px; border-radius: 10px; }
+      .grid { grid-template-columns: 1fr; }
+      header { padding: 12px 16px; }
     }
   </style>
 </head>
@@ -108,82 +188,84 @@
 
   <header>
     <h1>Daily Entry Form</h1>
-    <div class="sub">Writes straight into the Google Sheet</div>
+    <div class="sub">Saves directly into the Google Sheet</div>
   </header>
 
   <main>
-    <div class="status-banner" id="status-banner"></div>
+    <div class="banner" id="banner"></div>
 
-    <form id="entry-form">
+    <form id="entry-form" novalidate>
+
+      <!-- EMPLOYEE -->
       <div class="card">
-        <div class="section-title">Employee</div>
+        <div class="card-head"><h2>Employee</h2></div>
 
         <div class="field">
           <label for="f-employeeCode">Employee Code <span class="req">*</span></label>
-          <div class="lookup-row">
-            <input type="text" id="f-employeeCode" required placeholder="e.g. E1023">
-            <button type="button" class="mini" id="lookup-btn">Look up</button>
+          <div class="lookup">
+            <input type="text" id="f-employeeCode" autocomplete="off" placeholder="e.g. 901924">
+            <button type="button" class="ghost" id="lookup-btn">Look up</button>
           </div>
           <div class="lookup-status" id="lookup-status"></div>
         </div>
 
         <div class="field">
           <label for="f-name">Name <span class="req">*</span></label>
-          <input type="text" id="f-name" required>
+          <input type="text" id="f-name">
         </div>
 
-        <div class="row-2">
+        <div class="grid">
           <div class="field">
-            <label for="f-designation">Designation</label>
+            <label for="f-designation">Designation <span class="req">*</span></label>
             <input type="text" id="f-designation">
           </div>
           <div class="field">
-            <label for="f-homeLocation">Home Location</label>
+            <label for="f-homeLocation">Home Location <span class="req">*</span></label>
             <input type="text" id="f-homeLocation">
           </div>
-        </div>
-
-        <div class="row-2">
           <div class="field">
-            <label for="f-mobile">Mobile Number</label>
-            <input type="tel" id="f-mobile">
+            <label for="f-mobile">Mobile Number <span class="req">*</span></label>
+            <input type="tel" id="f-mobile" inputmode="numeric">
           </div>
           <div class="field">
-            <label for="f-email">Email Address</label>
-            <input type="email" id="f-email">
+            <label for="f-email">Email Address <span class="req">*</span></label>
+            <input type="email" id="f-email" inputmode="email">
           </div>
         </div>
       </div>
 
+      <!-- SECTION & DATE -->
       <div class="card">
-        <div class="section-title">Section &amp; Date</div>
+        <div class="card-head"><h2>Section &amp; Date</h2></div>
 
-        <div class="field">
-          <label for="f-date">Date <span class="req">*</span></label>
-          <input type="date" id="f-date" required>
-        </div>
-
-        <div class="field">
-          <label for="f-sectionName">Section Name</label>
-          <input type="text" id="f-sectionName">
-        </div>
-
-        <div class="field">
-          <label for="f-currentWorkingSection">Current Working Section <span class="req">*</span></label>
-          <select id="f-currentWorkingSection" required><option value="">Select…</option></select>
-          <div class="hint">Must be a registered zone (managed from the Zones tab of the dashboard).</div>
-        </div>
-
-        <div class="field">
-          <label for="f-teamLeader">Team Leader / Section In-Charge</label>
-          <select id="f-teamLeader"><option value="">Select a Current Working Section first…</option></select>
-          <input type="text" id="f-teamLeaderManual" placeholder="Enter team leader manually" style="display:none; margin-top:6px;">
+        <div class="grid">
+          <div class="field">
+            <label for="f-date">Date <span class="req">*</span></label>
+            <input type="date" id="f-date">
+          </div>
+          <div class="field">
+            <label for="f-currentWorkingSection">Current Working Section <span class="req">*</span></label>
+            <select id="f-currentWorkingSection"><option value="">Select…</option></select>
+          </div>
+          <div class="field full">
+            <label for="f-sectionName">Section Name <span class="req">*</span></label>
+            <input type="text" id="f-sectionName">
+          </div>
+          <div class="field full">
+            <label for="f-teamLeader">Team Leader / Section In-Charge <span class="req">*</span></label>
+            <select id="f-teamLeader"><option value="">Select a Current Working Section first…</option></select>
+            <input type="text" id="f-teamLeaderManual" placeholder="Enter team leader name" style="display:none; margin-top:6px;">
+          </div>
         </div>
       </div>
 
+      <!-- LEAVE -->
       <div class="card">
-        <div class="section-title">Leave</div>
-        <div class="row-2">
+        <div class="card-head">
+          <h2>Leave</h2>
+          <span class="note">Optional</span>
+        </div>
+        <div class="grid">
           <div class="field">
             <label for="f-leaveFrom">Leave From</label>
             <input type="date" id="f-leaveFrom">
@@ -193,122 +275,229 @@
             <input type="date" id="f-leaveTo">
           </div>
         </div>
-        <div class="hint">Leave both blank if not on leave. Fill only "From" for a single day.</div>
-      </div>
-
-      <div class="card">
-        <div class="section-title">Mobile App</div>
-        <div class="row-2">
-          <div class="field">
-            <label for="f-checkIn">Check-In Time <span class="req">*</span></label>
-            <input type="time" id="f-checkIn" required>
-          </div>
-          <div class="field">
-            <label for="f-checkOut">Check-Out Time <span class="req">*</span></label>
-            <input type="time" id="f-checkOut" required>
-          </div>
+        <div class="field" style="margin-top:10px; margin-bottom:0;">
+          <div class="hint">Leave both blank if not on leave. Fill only “From” for a single day.</div>
         </div>
       </div>
 
-      <div class="card">
-        <div class="section-title">Work Details</div>
+      <div class="leave-flag" id="leave-flag">
+        On leave — only <strong>Employee</strong> and <strong>Section &amp; Date</strong> are required.
+        Mobile App and Work Details are filled with “NA”.
+      </div>
 
-        <div class="field">
-          <label for="f-worksAssignedStation">Works Assigned Station <span class="req">*</span></label>
-          <input type="text" id="f-worksAssignedStation" required>
+      <!-- MOBILE APP -->
+      <div class="card" id="card-mobileapp">
+        <div class="card-head">
+          <h2>Mobile App</h2>
+          <span class="note" id="note-mobileapp">Optional</span>
+        </div>
+        <div class="grid">
+          <div class="field">
+            <label for="f-checkIn">Check-In Time</label>
+            <input type="time" id="f-checkIn">
+          </div>
+          <div class="field">
+            <label for="f-checkOut">Check-Out Time</label>
+            <input type="time" id="f-checkOut">
+          </div>
+        </div>
+      </div>
+
+      <!-- WORK DETAILS -->
+      <div class="card" id="card-work">
+        <div class="card-head">
+          <h2>Work Details</h2>
+          <span class="note" id="note-work"></span>
         </div>
 
         <div class="field">
-          <label for="f-worksAssigned">Works Assigned <span class="req">*</span></label>
-          <textarea id="f-worksAssigned" required></textarea>
+          <label for="f-worksAssignedStation">Works Assigned Station <span class="req" data-req>*</span></label>
+          <input type="text" id="f-worksAssignedStation" list="station-options" autocomplete="off">
+          <datalist id="station-options">
+            <option value="NA"></option>
+          </datalist>
+          <div class="hint">Type a station, or choose “NA” if none applies.</div>
         </div>
 
         <div class="field">
-          <label for="f-assignedWorksStatus">Assigned Works Status <span class="req">*</span></label>
-          <select id="f-assignedWorksStatus" required>
+          <label for="f-worksAssigned">Works Assigned <span class="req" data-req>*</span></label>
+          <textarea id="f-worksAssigned"></textarea>
+        </div>
+
+        <div class="field">
+          <label for="f-assignedWorksStatus">Assigned Works Status <span class="req" data-req>*</span></label>
+          <select id="f-assignedWorksStatus">
+            <option value="">Select…</option>
             <option value="Done">Done</option>
             <option value="Work in Progress">Work in Progress</option>
+            <option value="NA">NA</option>
             <option value="__manual__">Other (enter manually)</option>
           </select>
           <input type="text" id="f-assignedWorksStatusManual" placeholder="Enter status" style="display:none; margin-top:6px;">
         </div>
 
-        <div class="field">
-          <label for="f-remarks">Remarks</label>
+        <div class="field" style="margin-bottom:0;">
+          <label for="f-remarks">Remarks <span class="hint" style="font-weight:400;">(optional)</span></label>
           <textarea id="f-remarks"></textarea>
         </div>
       </div>
-
-      <button type="submit" class="submit" id="submit-btn">Submit Entry</button>
     </form>
   </main>
+
+  <div class="submit-bar">
+    <div class="inner">
+      <button type="submit" form="entry-form" class="submit" id="submit-btn">Submit Entry</button>
+    </div>
+  </div>
 
   <script src="config.js"></script>
   <script src="sheets-api.js"></script>
   <script>
+    var $ = function (id) { return document.getElementById(id); };
+
     function todayIso() {
       var d = new Date();
-      var mm = ('0' + (d.getMonth() + 1)).slice(-2);
-      var dd = ('0' + d.getDate()).slice(-2);
-      return d.getFullYear() + '-' + mm + '-' + dd;
+      return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
     }
-    document.getElementById('f-date').value = todayIso();
-    document.getElementById('f-date').max = todayIso();
+    $('f-date').value = todayIso();
+    $('f-date').max = todayIso();
 
     function showBanner(text, kind) {
-      var el = document.getElementById('status-banner');
+      var el = $('banner');
       el.textContent = text;
-      el.className = 'status-banner ' + kind;
+      el.className = 'banner ' + kind;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
     function clearBanner() {
-      var el = document.getElementById('status-banner');
-      el.className = 'status-banner';
-      el.textContent = '';
+      $('banner').className = 'banner';
+      $('banner').textContent = '';
     }
 
-    /* ---------- populate section dropdowns ---------- */
-    async function loadSections() {
-      var zones;
-      try {
-        zones = await api('getZones');
-      } catch (err) {
-        showBanner('Could not load section list: ' + err.message, 'error');
-        return;
-      }
+    /* ---------- which fields are required ----------
+       Employee + Section & Date are always required. Mobile App is always
+       optional. Work Details is required only when the entry is NOT a leave
+       entry — someone on leave has no work to report. */
+    var ALWAYS_REQUIRED = [
+      'f-employeeCode', 'f-name', 'f-designation', 'f-homeLocation', 'f-mobile',
+      'f-email', 'f-date', 'f-currentWorkingSection', 'f-sectionName'
+    ];
+    var WORK_REQUIRED = ['f-worksAssignedStation', 'f-worksAssigned', 'f-assignedWorksStatus'];
 
-      var select = document.getElementById('f-currentWorkingSection');
-      zones.forEach(function (name) {
-        var opt = document.createElement('option');
-        opt.value = name;
-        opt.textContent = name;
-        select.appendChild(opt);
+    function isOnLeave() { return !!$('f-leaveFrom').value; }
+
+    function applyLeaveMode() {
+      var onLeave = isOnLeave();
+
+      $('leave-flag').classList.toggle('on', onLeave);
+      $('card-work').classList.toggle('muted', onLeave);
+      $('card-mobileapp').classList.toggle('muted', onLeave);
+      $('note-work').textContent = onLeave ? 'Not required while on leave' : '';
+      $('note-work').className = 'note' + (onLeave ? ' on' : '');
+      $('note-mobileapp').textContent = onLeave ? 'Not required while on leave' : 'Optional';
+
+      // The required asterisks in Work Details only make sense off-leave.
+      document.querySelectorAll('#card-work [data-req]').forEach(function (star) {
+        star.style.display = onLeave ? 'none' : '';
       });
+
+      // Default the work fields to NA rather than disabling them: the row still
+      // gets written to the sheet, and a blank cell there reads as "nobody
+      // filled this in" instead of "this person was on leave".
+      if (onLeave) {
+        if (!$('f-worksAssignedStation').value) $('f-worksAssignedStation').value = 'NA';
+        if (!$('f-worksAssigned').value) $('f-worksAssigned').value = 'NA';
+        if (!$('f-assignedWorksStatus').value || $('f-assignedWorksStatus').value === '__manual__') {
+          $('f-assignedWorksStatus').value = 'NA';
+          $('f-assignedWorksStatusManual').style.display = 'none';
+          $('f-assignedWorksStatusManual').value = '';
+        }
+        clearInvalid(WORK_REQUIRED);
+      }
+    }
+    $('f-leaveFrom').addEventListener('change', applyLeaveMode);
+    $('f-leaveTo').addEventListener('change', applyLeaveMode);
+
+    function clearInvalid(ids) {
+      ids.forEach(function (id) { $(id).classList.remove('invalid'); });
+    }
+
+    function requiredIds() {
+      var ids = ALWAYS_REQUIRED.slice();
+      // Team leader can be picked from the list or typed in manually.
+      ids.push($('f-teamLeader').value === '__manual__' ? 'f-teamLeaderManual' : 'f-teamLeader');
+      if (!isOnLeave()) {
+        ids = ids.concat(WORK_REQUIRED);
+        if ($('f-assignedWorksStatus').value === '__manual__') ids.push('f-assignedWorksStatusManual');
+      }
+      return ids;
+    }
+
+    function validate() {
+      var ids = requiredIds();
+      var missing = [];
+      ids.forEach(function (id) {
+        var el = $(id);
+        var empty = !el.value || !el.value.trim() || el.value === '__manual__';
+        el.classList.toggle('invalid', empty);
+        if (empty) missing.push(el);
+      });
+
+      if (missing.length) {
+        missing[0].focus();
+        missing[0].scrollIntoView({ block: 'center', behavior: 'smooth' });
+        return 'Fill in all required fields — ' + missing.length + ' still empty.';
+      }
+      if ($('f-date').value > todayIso()) return 'Date cannot be in the future.';
+      if ($('f-leaveTo').value && !$('f-leaveFrom').value) return 'Enter a “Leave From” date as well as “Leave To”.';
+      if ($('f-leaveTo').value && $('f-leaveTo').value < $('f-leaveFrom').value) return '“Leave To” is before “Leave From”.';
+      return null;
+    }
+
+    // Clear the red state as soon as the user starts fixing a field.
+    document.querySelectorAll('input, select, textarea').forEach(function (el) {
+      el.addEventListener('input', function () { el.classList.remove('invalid'); });
+      el.addEventListener('change', function () { el.classList.remove('invalid'); });
+    });
+
+    /* ---------- sections ---------- */
+    async function loadSections() {
+      try {
+        var zones = await api('getZones');
+        var select = $('f-currentWorkingSection');
+        zones.forEach(function (name) {
+          var opt = document.createElement('option');
+          opt.value = name;
+          opt.textContent = name;
+          select.appendChild(opt);
+        });
+      } catch (err) {
+        showBanner('Could not load the section list: ' + err.message, 'error');
+      }
     }
     loadSections();
 
-    /* ---------- team leader dropdown, driven by Current Working Section ---------- */
-    // Guards against overlapping calls (e.g. blur + click both firing a lookup at
-    // once) racing to populate the same <select> — only the most recent call's
-    // result is ever applied.
-    var teamLeaderLoadToken = 0;
-    async function loadTeamLeadersForZone(zone) {
-      var myToken = ++teamLeaderLoadToken;
-      var select = document.getElementById('f-teamLeader');
+    /* ---------- team leaders, driven by Current Working Section ---------- */
+    // Guards against overlapping calls (blur + click both firing a lookup)
+    // racing to fill the same <select> — only the newest result is applied.
+    var teamLeaderToken = 0;
+    async function loadTeamLeaders(zone) {
+      var myToken = ++teamLeaderToken;
+      var select = $('f-teamLeader');
 
       if (!zone) {
         select.innerHTML = '<option value="">Select a Current Working Section first…</option>';
         return;
       }
+      select.innerHTML = '<option value="">Loading…</option>';
 
       var names;
       try {
         names = await api('getTeamLeaders', { zone: zone });
       } catch (err) {
-        console.error(err);
+        select.innerHTML = '<option value="">Select…</option>';
         return;
       }
-
-      if (myToken !== teamLeaderLoadToken) return;
+      if (myToken !== teamLeaderToken) return;
 
       select.innerHTML = '<option value="">Select…</option>';
       names.forEach(function (name) {
@@ -317,176 +506,164 @@
         opt.textContent = name;
         select.appendChild(opt);
       });
-
-      var manualOpt = document.createElement('option');
-      manualOpt.value = '__manual__';
-      manualOpt.textContent = 'Other (enter manually)';
-      select.appendChild(manualOpt);
+      var manual = document.createElement('option');
+      manual.value = '__manual__';
+      manual.textContent = 'Other (enter manually)';
+      select.appendChild(manual);
     }
 
-    document.getElementById('f-currentWorkingSection').addEventListener('change', function () {
-      loadTeamLeadersForZone(this.value);
-      document.getElementById('f-teamLeaderManual').style.display = 'none';
-      document.getElementById('f-teamLeaderManual').value = '';
+    $('f-currentWorkingSection').addEventListener('change', function () {
+      loadTeamLeaders(this.value);
+      $('f-teamLeaderManual').style.display = 'none';
+      $('f-teamLeaderManual').value = '';
     });
 
-    document.getElementById('f-teamLeader').addEventListener('change', function () {
-      var manualInput = document.getElementById('f-teamLeaderManual');
-      manualInput.style.display = this.value === '__manual__' ? '' : 'none';
-      if (this.value !== '__manual__') manualInput.value = '';
+    $('f-teamLeader').addEventListener('change', function () {
+      var manual = $('f-teamLeaderManual');
+      manual.style.display = this.value === '__manual__' ? '' : 'none';
+      if (this.value !== '__manual__') manual.value = '';
+      else manual.focus();
     });
 
-    function setTeamLeaderValue(teamLeader) {
-      if (!teamLeader) return;
-      var select = document.getElementById('f-teamLeader');
-      var manualInput = document.getElementById('f-teamLeaderManual');
-      var trimmed = teamLeader.trim();
+    function setTeamLeader(value) {
+      if (!value) return;
+      var select = $('f-teamLeader');
+      var manual = $('f-teamLeaderManual');
+      var trimmed = value.trim();
       var matched = Array.prototype.some.call(select.options, function (o) { return o.value === trimmed; });
       if (matched) {
         select.value = trimmed;
-        manualInput.style.display = 'none';
-        manualInput.value = '';
+        manual.style.display = 'none';
+        manual.value = '';
       } else {
         select.value = '__manual__';
-        manualInput.style.display = '';
-        manualInput.value = trimmed;
+        manual.style.display = '';
+        manual.value = trimmed;
       }
     }
 
-    /* ---------- employee lookup / auto-fill ---------- */
+    /* ---------- employee lookup ---------- */
     async function runLookup() {
-      var code = document.getElementById('f-employeeCode').value.trim();
+      var code = $('f-employeeCode').value.trim();
       if (!code) return;
-      var statusEl = document.getElementById('lookup-status');
-      statusEl.textContent = 'Looking up…';
-      statusEl.className = 'lookup-status';
+      var status = $('lookup-status');
+      status.textContent = 'Looking up…';
+      status.className = 'lookup-status busy';
 
       var data;
       try {
         data = await api('lookupEmployee', { employee_code: code });
       } catch (err) {
-        statusEl.textContent = 'Lookup error: ' + err.message;
-        statusEl.className = 'lookup-status notfound';
+        status.textContent = 'Lookup failed: ' + err.message;
+        status.className = 'lookup-status miss';
         return;
       }
 
-      if (data && data.found) {
-        statusEl.textContent = 'Found — fields auto-filled.';
-        statusEl.className = 'lookup-status found';
-        if (data.name) document.getElementById('f-name').value = data.name;
-        if (data.designation) document.getElementById('f-designation').value = data.designation;
-        if (data.home_location) document.getElementById('f-homeLocation').value = data.home_location;
-        if (data.mobile) document.getElementById('f-mobile').value = data.mobile;
-        if (data.email) document.getElementById('f-email').value = data.email;
-        if (data.section_name && !document.getElementById('f-sectionName').value) {
-          document.getElementById('f-sectionName').value = data.section_name;
-        }
-
-        var zoneSelect = document.getElementById('f-currentWorkingSection');
-        if (data.zone && !zoneSelect.value && Array.prototype.some.call(zoneSelect.options, function (o) { return o.value === data.zone; })) {
-          zoneSelect.value = data.zone;
-        }
-        if (zoneSelect.value) {
-          await loadTeamLeadersForZone(zoneSelect.value);
-        }
-        setTeamLeaderValue(data.team_leader);
-      } else {
-        statusEl.textContent = 'Not found in EMP_List — fill details manually.';
-        statusEl.className = 'lookup-status notfound';
+      if (!data || !data.found) {
+        status.textContent = 'Not in EMP_List — enter the details manually.';
+        status.className = 'lookup-status miss';
+        return;
       }
-    }
-    document.getElementById('lookup-btn').addEventListener('click', runLookup);
-    document.getElementById('f-employeeCode').addEventListener('blur', runLookup);
 
-    /* ---------- assigned works status: manual override ---------- */
-    document.getElementById('f-assignedWorksStatus').addEventListener('change', function () {
-      var manualInput = document.getElementById('f-assignedWorksStatusManual');
-      manualInput.style.display = this.value === '__manual__' ? '' : 'none';
-      if (this.value !== '__manual__') manualInput.value = '';
+      status.textContent = 'Found — details filled in.';
+      status.className = 'lookup-status found';
+      if (data.name) $('f-name').value = data.name;
+      if (data.designation) $('f-designation').value = data.designation;
+      if (data.home_location) $('f-homeLocation').value = data.home_location;
+      if (data.mobile) $('f-mobile').value = data.mobile;
+      if (data.email) $('f-email').value = data.email;
+      if (data.section_name && !$('f-sectionName').value) $('f-sectionName').value = data.section_name;
+
+      var zoneSelect = $('f-currentWorkingSection');
+      if (data.zone && !zoneSelect.value &&
+          Array.prototype.some.call(zoneSelect.options, function (o) { return o.value === data.zone; })) {
+        zoneSelect.value = data.zone;
+      }
+      if (zoneSelect.value) await loadTeamLeaders(zoneSelect.value);
+      setTeamLeader(data.team_leader);
+
+      clearInvalid(ALWAYS_REQUIRED);
+    }
+    $('lookup-btn').addEventListener('click', runLookup);
+    $('f-employeeCode').addEventListener('blur', runLookup);
+
+    /* ---------- status manual override ---------- */
+    $('f-assignedWorksStatus').addEventListener('change', function () {
+      var manual = $('f-assignedWorksStatusManual');
+      manual.style.display = this.value === '__manual__' ? '' : 'none';
+      if (this.value !== '__manual__') manual.value = '';
+      else manual.focus();
     });
 
     /* ---------- submit ---------- */
-    document.getElementById('entry-form').addEventListener('submit', async function (e) {
+    $('entry-form').addEventListener('submit', async function (e) {
       e.preventDefault();
       clearBanner();
 
-      if (document.getElementById('f-date').value > todayIso()) {
-        showBanner('Date cannot be in the future — only today or earlier is allowed.', 'error');
+      var problem = validate();
+      if (problem) {
+        showBanner(problem, 'error');
         return;
       }
 
-      var currentWorkingSection = document.getElementById('f-currentWorkingSection').value;
-      if (!currentWorkingSection) {
-        showBanner('Please select a Current Working Section.', 'error');
-        return;
-      }
-
-      if (document.getElementById('f-assignedWorksStatus').value === '__manual__'
-          && !document.getElementById('f-assignedWorksStatusManual').value.trim()) {
-        showBanner('Please enter the Assigned Works Status.', 'error');
-        return;
-      }
-
-      var leaveFrom = document.getElementById('f-leaveFrom').value || null;
-      var leaveTo = document.getElementById('f-leaveTo').value || null;
-
+      var section = $('f-currentWorkingSection').value;
       var entry = {
-        entry_date: document.getElementById('f-date').value,
-        section_name: document.getElementById('f-sectionName').value || null,
-        team_leader: (function () {
-          var selected = document.getElementById('f-teamLeader').value;
-          return selected === '__manual__'
-            ? (document.getElementById('f-teamLeaderManual').value || null)
-            : (selected || null);
-        })(),
-        employee_code: document.getElementById('f-employeeCode').value.trim(),
-        employee_name: document.getElementById('f-name').value.trim(),
-        designation: document.getElementById('f-designation').value || null,
-        home_location: document.getElementById('f-homeLocation').value || null,
-        mobile: document.getElementById('f-mobile').value || null,
-        current_working_section: currentWorkingSection,
-        leave_from: leaveFrom,
-        leave_to: leaveTo,
-        check_in_time: document.getElementById('f-checkIn').value || null,
-        check_out_time: document.getElementById('f-checkOut').value || null,
-        works_assigned_station: document.getElementById('f-worksAssignedStation').value || null,
-        works_assigned: document.getElementById('f-worksAssigned').value || null,
-        assigned_works_status: (function () {
-          var selected = document.getElementById('f-assignedWorksStatus').value;
-          return selected === '__manual__'
-            ? (document.getElementById('f-assignedWorksStatusManual').value || null)
-            : selected;
-        })(),
-        remarks: document.getElementById('f-remarks').value || null,
-        email: document.getElementById('f-email').value || null
+        entry_date: $('f-date').value,
+        section_name: $('f-sectionName').value || null,
+        team_leader: $('f-teamLeader').value === '__manual__'
+          ? ($('f-teamLeaderManual').value || null)
+          : ($('f-teamLeader').value || null),
+        employee_code: $('f-employeeCode').value.trim(),
+        employee_name: $('f-name').value.trim(),
+        designation: $('f-designation').value || null,
+        home_location: $('f-homeLocation').value || null,
+        mobile: $('f-mobile').value || null,
+        current_working_section: section,
+        leave_from: $('f-leaveFrom').value || null,
+        leave_to: $('f-leaveTo').value || null,
+        check_in_time: $('f-checkIn').value || null,
+        check_out_time: $('f-checkOut').value || null,
+        works_assigned_station: $('f-worksAssignedStation').value || null,
+        works_assigned: $('f-worksAssigned').value || null,
+        assigned_works_status: $('f-assignedWorksStatus').value === '__manual__'
+          ? ($('f-assignedWorksStatusManual').value || null)
+          : ($('f-assignedWorksStatus').value || null),
+        remarks: $('f-remarks').value || null,
+        email: $('f-email').value || null
       };
 
-      var btn = document.getElementById('submit-btn');
+      var btn = $('submit-btn');
       btn.disabled = true;
       btn.textContent = 'Submitting…';
 
-      var result;
       try {
-        result = await api('submitEntry', { entry: entry });
+        await api('submitEntry', { entry: entry });
       } catch (err) {
+        showBanner('Could not save: ' + err.message, 'error');
+        return;
+      } finally {
         btn.disabled = false;
         btn.textContent = 'Submit Entry';
-        showBanner('Error: ' + err.message, 'error');
-        return;
       }
 
-      btn.disabled = false;
-      btn.textContent = 'Submit Entry';
-
-      showBanner('Entry saved to the "' + result.sheet + '" sheet (row ' + result.row + ').', 'success');
-      document.getElementById('entry-form').reset();
-      document.getElementById('f-date').value = todayIso();
-      document.getElementById('f-date').max = todayIso();
-      document.getElementById('lookup-status').textContent = '';
-      document.getElementById('f-assignedWorksStatusManual').style.display = 'none';
-      document.getElementById('f-teamLeaderManual').style.display = 'none';
-      loadTeamLeadersForZone('');
+      showBanner('Entry saved for ' + section + '.', 'success');
+      resetForm();
     });
+
+    function resetForm() {
+      $('entry-form').reset();
+      $('f-date').value = todayIso();
+      $('f-date').max = todayIso();
+      $('lookup-status').textContent = '';
+      $('lookup-status').className = 'lookup-status';
+      $('f-assignedWorksStatusManual').style.display = 'none';
+      $('f-teamLeaderManual').style.display = 'none';
+      document.querySelectorAll('.invalid').forEach(function (el) { el.classList.remove('invalid'); });
+      loadTeamLeaders('');
+      applyLeaveMode();
+    }
+
+    applyLeaveMode();
   </script>
 
 </body>
