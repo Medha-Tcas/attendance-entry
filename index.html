@@ -459,24 +459,64 @@
       el.addEventListener('change', function () { el.classList.remove('invalid'); });
     });
 
-    /* ---------- sections ---------- */
-    async function loadSections() {
+    /* ---------- sections + team leaders ----------
+       Fetched together in a single request on load. Each call to the sheet
+       costs 2-3 seconds, so asking again every time the section changed is
+       what made the dropdowns feel slow — now that's a local lookup. */
+    var teamLeadersByZone = {};
+
+    function fillSections(zones) {
+      var select = $('f-currentWorkingSection');
+      select.innerHTML = '<option value="">Select…</option>';
+      zones.forEach(function (name) {
+        var opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = name;
+        select.appendChild(opt);
+      });
+    }
+
+    async function loadFormData() {
+      var select = $('f-currentWorkingSection');
+      select.innerHTML = '<option value="">Loading sections…</option>';
+
       try {
-        var zones = await api('getZones');
-        var select = $('f-currentWorkingSection');
-        zones.forEach(function (name) {
-          var opt = document.createElement('option');
-          opt.value = name;
-          opt.textContent = name;
-          select.appendChild(opt);
-        });
+        var data = await api('getFormData');
+        if (!data || !Array.isArray(data.zones)) throw new Error('unexpected shape');
+        teamLeadersByZone = data.team_leaders || {};
+        fillSections(data.zones);
+        return;
       } catch (err) {
-        showBanner('Could not load the section list: ' + err.message, 'error');
+        // Older deployments don't have getFormData. Fall back to the original
+        // two-call shape so the form still works before the script is updated.
+        try {
+          var zones = await apiList('getZones');
+          teamLeadersByZone = null;   // null = fetch per zone on demand
+          fillSections(zones);
+          return;
+        } catch (err2) {
+          select.innerHTML = '<option value="">Select…</option>';
+          showBanner('Could not load the section list: ' + err2.message, 'error');
+        }
       }
     }
-    loadSections();
+    loadFormData();
 
-    /* ---------- team leaders, driven by Current Working Section ---------- */
+    function renderTeamLeaders(names) {
+      var select = $('f-teamLeader');
+      select.innerHTML = '<option value="">Select…</option>';
+      (names || []).forEach(function (name) {
+        var opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = name;
+        select.appendChild(opt);
+      });
+      var manual = document.createElement('option');
+      manual.value = '__manual__';
+      manual.textContent = 'Other (enter manually)';
+      select.appendChild(manual);
+    }
+
     // Guards against overlapping calls (blur + click both firing a lookup)
     // racing to fill the same <select> — only the newest result is applied.
     var teamLeaderToken = 0;
@@ -488,28 +528,21 @@
         select.innerHTML = '<option value="">Select a Current Working Section first…</option>';
         return;
       }
-      select.innerHTML = '<option value="">Loading…</option>';
+      if (teamLeadersByZone) {
+        renderTeamLeaders(teamLeadersByZone[zone]);
+        return;
+      }
 
+      select.innerHTML = '<option value="">Loading…</option>';
       var names;
       try {
-        names = await api('getTeamLeaders', { zone: zone });
+        names = await apiList('getTeamLeaders', { zone: zone });
       } catch (err) {
-        select.innerHTML = '<option value="">Select…</option>';
+        renderTeamLeaders([]);
         return;
       }
       if (myToken !== teamLeaderToken) return;
-
-      select.innerHTML = '<option value="">Select…</option>';
-      names.forEach(function (name) {
-        var opt = document.createElement('option');
-        opt.value = name;
-        opt.textContent = name;
-        select.appendChild(opt);
-      });
-      var manual = document.createElement('option');
-      manual.value = '__manual__';
-      manual.textContent = 'Other (enter manually)';
-      select.appendChild(manual);
+      renderTeamLeaders(names);
     }
 
     $('f-currentWorkingSection').addEventListener('change', function () {
