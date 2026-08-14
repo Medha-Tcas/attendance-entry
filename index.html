@@ -260,10 +260,10 @@
       </div>
 
       <!-- LEAVE -->
-      <div class="card">
+      <div class="card" id="card-leave">
         <div class="card-head">
           <h2>Leave</h2>
-          <span class="note">Optional</span>
+          <span class="note" id="note-leave">Or fill Mobile App below</span>
         </div>
         <div class="grid">
           <div class="field">
@@ -276,28 +276,31 @@
           </div>
         </div>
         <div class="field" style="margin-top:10px; margin-bottom:0;">
-          <div class="hint">Leave both blank if not on leave. Fill only “From” for a single day.</div>
+          <div class="hint">
+            Fill this <strong>or</strong> the Mobile App times below — one of the two is required.
+            Fill only “From” for a single day’s leave.
+          </div>
         </div>
       </div>
 
       <div class="leave-flag" id="leave-flag">
         On leave — only <strong>Employee</strong> and <strong>Section &amp; Date</strong> are required.
-        Mobile App and Work Details are filled with “NA”.
+        Check-In/Check-Out can be left blank, and Work Details are filled with “NA”.
       </div>
 
       <!-- MOBILE APP -->
       <div class="card" id="card-mobileapp">
         <div class="card-head">
           <h2>Mobile App</h2>
-          <span class="note" id="note-mobileapp">Optional</span>
+          <span class="note" id="note-mobileapp">Or fill Leave above</span>
         </div>
         <div class="grid">
           <div class="field">
-            <label for="f-checkIn">Check-In Time</label>
+            <label for="f-checkIn">Check-In Time <span class="req" data-req-mobile>*</span></label>
             <input type="time" id="f-checkIn">
           </div>
           <div class="field">
-            <label for="f-checkOut">Check-Out Time</label>
+            <label for="f-checkOut">Check-Out Time <span class="req" data-req-mobile>*</span></label>
             <input type="time" id="f-checkOut">
           </div>
         </div>
@@ -374,13 +377,16 @@
     }
 
     /* ---------- which fields are required ----------
-       Employee + Section & Date are always required. Mobile App is always
-       optional. Work Details is required only when the entry is NOT a leave
-       entry — someone on leave has no work to report. */
+       Employee + Section & Date are always required. Beyond that the day was
+       either worked or not: entering a Leave period makes Mobile App and Work
+       Details unnecessary, and with no leave the check-in/out times and the
+       work fields are all required. So exactly one of Leave / Mobile App must
+       always be filled. */
     var ALWAYS_REQUIRED = [
       'f-employeeCode', 'f-name', 'f-designation', 'f-homeLocation', 'f-mobile',
       'f-email', 'f-date', 'f-currentWorkingSection', 'f-sectionName'
     ];
+    var MOBILE_REQUIRED = ['f-checkIn', 'f-checkOut'];
     var WORK_REQUIRED = ['f-worksAssignedStation', 'f-worksAssigned', 'f-assignedWorksStatus'];
 
     function isOnLeave() { return !!$('f-leaveFrom').value; }
@@ -393,12 +399,20 @@
       $('card-mobileapp').classList.toggle('muted', onLeave);
       $('note-work').textContent = onLeave ? 'Not required while on leave' : '';
       $('note-work').className = 'note' + (onLeave ? ' on' : '');
-      $('note-mobileapp').textContent = onLeave ? 'Not required while on leave' : 'Optional';
+      $('note-mobileapp').textContent = onLeave ? 'Not required while on leave' : 'Or fill Leave above';
+      $('note-mobileapp').className = 'note' + (onLeave ? ' on' : '');
+      // The other direction: once the check-in/out times are in, Leave stops
+      // being one of the two things the entry could be waiting on.
+      var mobileFilled = !!($('f-checkIn').value && $('f-checkOut').value);
+      $('note-leave').textContent = onLeave ? 'Entered'
+        : (mobileFilled ? 'Not required' : 'Or fill Mobile App below');
+      $('note-leave').className = 'note' + (onLeave || mobileFilled ? ' on' : '');
 
-      // The required asterisks in Work Details only make sense off-leave.
-      document.querySelectorAll('#card-work [data-req]').forEach(function (star) {
+      // The asterisks in Mobile App and Work Details only apply off-leave.
+      document.querySelectorAll('#card-work [data-req], [data-req-mobile]').forEach(function (star) {
         star.style.display = onLeave ? 'none' : '';
       });
+      if (onLeave) clearInvalid(MOBILE_REQUIRED);
 
       // Default the work fields to NA rather than disabling them: the row still
       // gets written to the sheet, and a blank cell there reads as "nobody
@@ -414,8 +428,10 @@
         clearInvalid(WORK_REQUIRED);
       }
     }
-    $('f-leaveFrom').addEventListener('change', applyLeaveMode);
-    $('f-leaveTo').addEventListener('change', applyLeaveMode);
+    ['f-leaveFrom', 'f-leaveTo', 'f-checkIn', 'f-checkOut'].forEach(function (id) {
+      $(id).addEventListener('change', applyLeaveMode);
+      $(id).addEventListener('input', applyLeaveMode);
+    });
 
     function clearInvalid(ids) {
       ids.forEach(function (id) { $(id).classList.remove('invalid'); });
@@ -426,7 +442,7 @@
       // Team leader can be picked from the list or typed in manually.
       ids.push($('f-teamLeader').value === '__manual__' ? 'f-teamLeaderManual' : 'f-teamLeader');
       if (!isOnLeave()) {
-        ids = ids.concat(WORK_REQUIRED);
+        ids = ids.concat(MOBILE_REQUIRED, WORK_REQUIRED);
         if ($('f-assignedWorksStatus').value === '__manual__') ids.push('f-assignedWorksStatusManual');
       }
       return ids;
@@ -445,7 +461,11 @@
       if (missing.length) {
         missing[0].focus();
         missing[0].scrollIntoView({ block: 'center', behavior: 'smooth' });
-        return 'Fill in all required fields — ' + missing.length + ' still empty.';
+        var message = 'Fill in all required fields — ' + missing.length + ' still empty.';
+        if (!isOnLeave() && (!$('f-checkIn').value || !$('f-checkOut').value)) {
+          message += ' Check-In and Check-Out are required unless you enter a Leave period.';
+        }
+        return message;
       }
       if ($('f-date').value > todayIso()) return 'Date cannot be in the future.';
       if ($('f-leaveTo').value && !$('f-leaveFrom').value) return 'Enter a “Leave From” date as well as “Leave To”.';
