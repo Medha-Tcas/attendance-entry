@@ -244,16 +244,20 @@
             <input type="date" id="f-date">
           </div>
           <div class="field">
-            <label for="f-currentWorkingSection">Current Working Section <span class="req">*</span></label>
+            <!-- The zone picker is what routes the entry to its sheet tab, which
+                 is why it stays a dropdown of the actual tab names. It is only
+                 the label that changed from "Current Working Section". -->
+            <label for="f-currentWorkingSection">Zone <span class="req">*</span></label>
             <select id="f-currentWorkingSection"><option value="">Select…</option></select>
           </div>
           <div class="field full">
             <label for="f-sectionName">Section Name <span class="req">*</span></label>
-            <input type="text" id="f-sectionName">
+            <input type="text" id="f-sectionName" autocomplete="off">
+            <div class="hint">Typed in — the specific section within the zone.</div>
           </div>
           <div class="field full">
             <label for="f-teamLeader">Team Leader / Section In-Charge <span class="req">*</span></label>
-            <select id="f-teamLeader"><option value="">Select a Current Working Section first…</option></select>
+            <select id="f-teamLeader"><option value="">Select a Zone first…</option></select>
             <input type="text" id="f-teamLeaderManual" placeholder="Enter team leader name" style="display:none; margin-top:6px;">
           </div>
         </div>
@@ -545,7 +549,7 @@
       var select = $('f-teamLeader');
 
       if (!zone) {
-        select.innerHTML = '<option value="">Select a Current Working Section first…</option>';
+        select.innerHTML = '<option value="">Select a Zone first…</option>';
         return;
       }
       if (teamLeadersByZone) {
