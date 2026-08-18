@@ -244,6 +244,18 @@
             <input type="date" id="f-date">
           </div>
           <div class="field">
+            <label for="f-dayType">Day Type <span class="req">*</span></label>
+            <select id="f-dayType">
+              <option value="">Working Day</option>
+              <option value="Holiday">Holiday</option>
+              <option value="Rest / Week Off">Rest / Week Off</option>
+              <option value="Public Holiday (PH)">Public Holiday (PH)</option>
+              <option value="Others">Others</option>
+            </select>
+            <input type="text" id="f-dayTypeOther" placeholder="Specify the day type"
+                   style="display:none; margin-top:6px;" autocomplete="off">
+          </div>
+          <div class="field">
             <!-- The zone picker is what routes the entry to its sheet tab, which
                  is why it stays a dropdown of the actual tab names. It is only
                  the label that changed from "Current Working Section". -->
@@ -285,6 +297,12 @@
             Fill only “From” for a single day’s leave.
           </div>
         </div>
+      </div>
+
+      <div class="leave-flag" id="daytype-flag">
+        <span id="daytype-flag-text"></span> — only <strong>Employee</strong> and
+        <strong>Section &amp; Date</strong> are needed. Leave, Mobile App and Work Details
+        are hidden and left out of this entry.
       </div>
 
       <div class="leave-flag" id="leave-flag">
@@ -395,7 +413,38 @@
 
     function isOnLeave() { return !!$('f-leaveFrom').value; }
 
+    /* A day type other than Working Day means there is nothing to report for
+       the day at all, so Leave, Mobile App and Work Details are hidden rather
+       than merely optional — an entry still gets filed, recording why. */
+    function isNonWorkingDayType() { return !!$('f-dayType').value; }
+
+    function dayTypeLabel() {
+      var selected = $('f-dayType').value;
+      if (!selected) return '';
+      return selected === 'Others' ? $('f-dayTypeOther').value.trim() : selected;
+    }
+
     function applyLeaveMode() {
+      var nonWorking = isNonWorkingDayType();
+
+      $('f-dayTypeOther').style.display = $('f-dayType').value === 'Others' ? '' : 'none';
+      if ($('f-dayType').value !== 'Others') $('f-dayTypeOther').value = '';
+
+      ['card-leave', 'card-mobileapp', 'card-work'].forEach(function (id) {
+        $(id).style.display = nonWorking ? 'none' : '';
+      });
+      $('daytype-flag').classList.toggle('on', nonWorking);
+      $('daytype-flag-text').textContent = dayTypeLabel() || $('f-dayType').value;
+
+      if (nonWorking) {
+        // Nothing in the hidden sections can be required or invalid, and any
+        // values typed before switching would otherwise be submitted unseen.
+        $('leave-flag').classList.remove('on');
+        ['f-leaveFrom', 'f-leaveTo', 'f-checkIn', 'f-checkOut'].forEach(function (id) { $(id).value = ''; });
+        clearInvalid(MOBILE_REQUIRED.concat(WORK_REQUIRED, ['f-leaveFrom', 'f-leaveTo']));
+        return;
+      }
+
       var onLeave = isOnLeave();
 
       $('leave-flag').classList.toggle('on', onLeave);
@@ -432,7 +481,7 @@
         clearInvalid(WORK_REQUIRED);
       }
     }
-    ['f-leaveFrom', 'f-leaveTo', 'f-checkIn', 'f-checkOut'].forEach(function (id) {
+    ['f-leaveFrom', 'f-leaveTo', 'f-checkIn', 'f-checkOut', 'f-dayType', 'f-dayTypeOther'].forEach(function (id) {
       $(id).addEventListener('change', applyLeaveMode);
       $(id).addEventListener('input', applyLeaveMode);
     });
@@ -445,6 +494,11 @@
       var ids = ALWAYS_REQUIRED.slice();
       // Team leader can be picked from the list or typed in manually.
       ids.push($('f-teamLeader').value === '__manual__' ? 'f-teamLeaderManual' : 'f-teamLeader');
+      if (isNonWorkingDayType()) {
+        // "Others" is only meaningful once it says what it is.
+        if ($('f-dayType').value === 'Others') ids.push('f-dayTypeOther');
+        return ids;
+      }
       if (!isOnLeave()) {
         ids = ids.concat(MOBILE_REQUIRED, WORK_REQUIRED);
         if ($('f-assignedWorksStatus').value === '__manual__') ids.push('f-assignedWorksStatusManual');
@@ -466,7 +520,8 @@
         missing[0].focus();
         missing[0].scrollIntoView({ block: 'center', behavior: 'smooth' });
         var message = 'Fill in all required fields — ' + missing.length + ' still empty.';
-        if (!isOnLeave() && (!$('f-checkIn').value || !$('f-checkOut').value)) {
+        if (!isNonWorkingDayType() && !isOnLeave() &&
+            (!$('f-checkIn').value || !$('f-checkOut').value)) {
           message += ' Check-In and Check-Out are required unless you enter a Leave period.';
         }
         return message;
@@ -689,6 +744,20 @@
         email: $('f-email').value || null
       };
 
+      // A non-working day still gets a row, so the day is on record rather
+      // than simply absent. The day type goes in Assigned Works Status, which
+      // is what the dashboard's Work Summary groups by, and the other work
+      // columns get NA to match how a leave row reads.
+      if (isNonWorkingDayType()) {
+        entry.works_assigned_station = 'NA';
+        entry.works_assigned = 'NA';
+        entry.assigned_works_status = dayTypeLabel();
+        entry.leave_from = null;
+        entry.leave_to = null;
+        entry.check_in_time = null;
+        entry.check_out_time = null;
+      }
+
       var btn = $('submit-btn');
       btn.disabled = true;
       btn.textContent = 'Submitting…';
@@ -703,7 +772,8 @@
         btn.textContent = 'Submit Entry';
       }
 
-      showBanner('Entry saved for ' + section + '.', 'success');
+      showBanner('Entry saved for ' + section +
+        (isNonWorkingDayType() ? ' (' + dayTypeLabel() + ').' : '.'), 'success');
       resetForm();
     });
 
