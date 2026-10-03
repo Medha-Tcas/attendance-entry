@@ -375,8 +375,8 @@
     </div>
   </div>
 
-  <script src="config.js"></script>
-  <script src="sheets-api.js"></script>
+  <script src="../assets/config.js"></script>
+  <script src="../assets/sheets-api.js"></script>
   <script>
     var $ = function (id) { return document.getElementById(id); };
 
@@ -655,9 +655,15 @@
     }
 
     /* ---------- employee lookup ---------- */
+    // The zone EMP_List holds for the employee last looked up. Compared with
+    // the zone picked on submit: a difference means the employee is filing
+    // from another zone, and the roster will be moved to it.
+    var rosterZone = '';
+
     async function runLookup() {
       var code = $('f-employeeCode').value.trim();
       if (!code) return;
+      rosterZone = '';
       var status = $('lookup-status');
       status.textContent = 'Looking up…';
       status.className = 'lookup-status busy';
@@ -677,6 +683,7 @@
         return;
       }
 
+      rosterZone = data.zone || '';
       status.textContent = 'Found — details filled in.';
       status.className = 'lookup-status found';
       if (data.name) $('f-name').value = data.name;
@@ -758,12 +765,21 @@
         entry.check_out_time = null;
       }
 
+      // Filing from a zone other than the roster's moves the employee there.
+      if (rosterZone && rosterZone !== section &&
+          !confirm('EMP_List has ' + entry.employee_code + ' in zone ' + rosterZone + '.\n\n' +
+                   'Submitting this entry under ' + section + ' will change their zone to ' +
+                   section + ' from now on.\n\nContinue?')) {
+        return;
+      }
+
       var btn = $('submit-btn');
       btn.disabled = true;
       btn.textContent = 'Submitting…';
 
+      var result;
       try {
-        await api('submitEntry', { entry: entry });
+        result = await api('submitEntry', { entry: entry });
       } catch (err) {
         showBanner('Could not save: ' + err.message, 'error');
         return;
@@ -772,12 +788,17 @@
         btn.textContent = 'Submit Entry';
       }
 
+      var zc = result && result.zone_change;
       showBanner('Entry saved for ' + section +
-        (isNonWorkingDayType() ? ' (' + dayTypeLabel() + ').' : '.'), 'success');
+        (isNonWorkingDayType() ? ' (' + dayTypeLabel() + ').' : '.') +
+        (zc && zc.to ? ' Zone updated from ' + zc.from + ' to ' + zc.to + '.' : '') +
+        (zc && zc.error ? ' (Entry saved, but the zone could not be updated: ' + zc.error + ')' : ''),
+        'success');
       resetForm();
     });
 
     function resetForm() {
+      rosterZone = '';
       $('entry-form').reset();
       $('f-date').value = todayIso();
       $('f-date').max = todayIso();
