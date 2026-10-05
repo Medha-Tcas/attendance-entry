@@ -800,7 +800,7 @@
         (isNonWorkingDayType() ? ' (' + dayTypeLabel() + ')' : '') + '.' +
         (saved && saved.zone_changed
           ? ' Zone updated from ' + saved.zone_changed.from + ' to ' + saved.zone_changed.to + '.'
-          : ''), 'success');
+          : (saved && saved.zone_sync_note ? ' ' + saved.zone_sync_note : '')), 'success');
       resetForm();
     });
 
