@@ -261,6 +261,7 @@
                  the label that changed from "Current Working Section". -->
             <label for="f-currentWorkingSection">Zone <span class="req">*</span></label>
             <select id="f-currentWorkingSection"><option value="">Select…</option></select>
+            <div class="hint" id="zone-hint" style="display:none;"></div>
           </div>
           <div class="field full">
             <label for="f-sectionName">Section Name <span class="req">*</span></label>
@@ -375,8 +376,8 @@
     </div>
   </div>
 
-  <script src="config.js"></script>
-  <script src="sheets-api.js"></script>
+  <script src="../assets/config.js"></script>
+  <script src="../assets/sheets-api.js"></script>
   <script>
     var $ = function (id) { return document.getElementById(id); };
 
@@ -654,6 +655,26 @@
       }
     }
 
+    /* ---------- zone change notice ----------
+       Employees may file from a zone other than their own. When the chosen
+       zone differs from EMP_List, saving moves them to it (the backend does
+       the update), so say so before they submit. */
+    var rosterZone = '';
+    function showZoneHint() {
+      var chosen = $('f-currentWorkingSection').value;
+      var hint = $('zone-hint');
+      if (rosterZone && chosen && chosen.toUpperCase() !== rosterZone.toUpperCase()) {
+        hint.textContent = 'EMP_List has this employee in ' + rosterZone +
+          '. Submitting under ' + chosen + ' will update their zone to ' + chosen + '.';
+        hint.style.display = '';
+      } else {
+        hint.textContent = '';
+        hint.style.display = 'none';
+      }
+    }
+    $('f-currentWorkingSection').addEventListener('change', showZoneHint);
+    $('f-employeeCode').addEventListener('input', function () { rosterZone = ''; showZoneHint(); });
+
     /* ---------- employee lookup ---------- */
     async function runLookup() {
       var code = $('f-employeeCode').value.trim();
@@ -691,8 +712,10 @@
           Array.prototype.some.call(zoneSelect.options, function (o) { return o.value === data.zone; })) {
         zoneSelect.value = data.zone;
       }
+      rosterZone = data.zone || '';
       if (zoneSelect.value) await loadTeamLeaders(zoneSelect.value);
       setTeamLeader(data.team_leader);
+      showZoneHint();
 
       clearInvalid(ALWAYS_REQUIRED);
     }
@@ -759,11 +782,12 @@
       }
 
       var btn = $('submit-btn');
+      var saved = null;
       btn.disabled = true;
       btn.textContent = 'Submitting…';
 
       try {
-        await api('submitEntry', { entry: entry });
+        saved = await api('submitEntry', { entry: entry });
       } catch (err) {
         showBanner('Could not save: ' + err.message, 'error');
         return;
@@ -773,7 +797,10 @@
       }
 
       showBanner('Entry saved for ' + section +
-        (isNonWorkingDayType() ? ' (' + dayTypeLabel() + ').' : '.'), 'success');
+        (isNonWorkingDayType() ? ' (' + dayTypeLabel() + ')' : '') + '.' +
+        (saved && saved.zone_changed
+          ? ' Zone updated from ' + saved.zone_changed.from + ' to ' + saved.zone_changed.to + '.'
+          : ''), 'success');
       resetForm();
     });
 
@@ -783,6 +810,8 @@
       $('f-date').max = todayIso();
       $('lookup-status').textContent = '';
       $('lookup-status').className = 'lookup-status';
+      rosterZone = '';
+      showZoneHint();
       $('f-assignedWorksStatusManual').style.display = 'none';
       $('f-teamLeaderManual').style.display = 'none';
       document.querySelectorAll('.invalid').forEach(function (el) { el.classList.remove('invalid'); });
