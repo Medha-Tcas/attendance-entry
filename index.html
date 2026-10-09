@@ -556,17 +556,46 @@
       });
     }
 
+    // The section list and team leaders barely change, so the last copy is
+    // kept in this browser and shown instantly; the fresh copy is fetched in
+    // the background and replaces it. Storage can be unavailable (private
+    // mode, blocked), so every access is guarded.
+    var FORM_CACHE_KEY = 'attendance.formdata.v1';
+    function readFormCache() {
+      try {
+        var d = JSON.parse(localStorage.getItem(FORM_CACHE_KEY) || 'null');
+        return d && Array.isArray(d.zones) ? d : null;
+      } catch (e) { return null; }
+    }
+    function writeFormCache(d) {
+      try { localStorage.setItem(FORM_CACHE_KEY, JSON.stringify(d)); } catch (e) {}
+    }
+
     async function loadFormData() {
       var select = $('f-currentWorkingSection');
-      select.innerHTML = '<option value="">Loading sections…</option>';
+      var cached = readFormCache();
+      if (cached) {
+        teamLeadersByZone = cached.team_leaders || {};
+        fillSections(cached.zones);
+      } else {
+        select.innerHTML = '<option value="">Loading sections…</option>';
+      }
 
       try {
         var data = await api('getFormData');
         if (!data || !Array.isArray(data.zones)) throw new Error('unexpected shape');
+        writeFormCache(data);
         teamLeadersByZone = data.team_leaders || {};
-        fillSections(data.zones);
+        // Re-render only if something changed, so a choice the user has
+        // already made isn't wiped by the background refresh.
+        if (!cached || JSON.stringify(cached.zones) !== JSON.stringify(data.zones)) {
+          var keep = select.value;
+          fillSections(data.zones);
+          if (keep && data.zones.indexOf(keep) !== -1) select.value = keep;
+        }
         return;
       } catch (err) {
+        if (cached) return;   // the saved copy is already on screen
         // Older deployments don't have getFormData. Fall back to the original
         // two-call shape so the form still works before the script is updated.
         try {
