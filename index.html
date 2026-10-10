@@ -825,11 +825,12 @@
         btn.textContent = 'Submit Entry';
       }
 
-      showBanner('Entry saved for ' + section +
-        (isNonWorkingDayType() ? ' (' + dayTypeLabel() + ')' : '') + '.' +
-        (saved && saved.zone_changed
-          ? ' Zone updated from ' + saved.zone_changed.from + ' to ' + saved.zone_changed.to + '.'
-          : (saved && saved.zone_sync_note ? ' ' + saved.zone_sync_note : '')), 'success');
+      var changed = !!(saved && saved.zone_changed);
+      // The reason an EMP_List update was skipped is kept out of the banner
+      // (it was long and mostly noise) but stays available for troubleshooting.
+      if (saved && saved.zone_sync_note) console.info(saved.zone_sync_note);
+      showBanner('Entry submitted' + (changed ? ' / Details modified' : '') +
+        (isNonWorkingDayType() ? ' (' + dayTypeLabel() + ')' : '') + '.', 'success');
       resetForm();
     });
 
